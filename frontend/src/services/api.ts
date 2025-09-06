@@ -47,6 +47,18 @@ export const generateOutfits = async (imageId: string, shoes: ShoeRecommendation
   return response.data.results;
 };
 
+export const generateOutfitsAI = async (imageId: string, shoes: ShoeRecommendation[]): Promise<OutfitResult[]> => {
+  const response = await axios.post(`${API_BASE_URL}/generate-outfits-ai`, {
+    image_id: imageId,
+    shoes: shoes,
+  }, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return response.data.results;
+};
+
 export const healthCheck = async (): Promise<boolean> => {
   try {
     await axios.get(`${API_BASE_URL}/health`);

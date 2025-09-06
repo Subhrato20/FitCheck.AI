@@ -104,10 +104,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadSuccess, onUploadErro
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className={`relative border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 ${
+            className={`relative border-2 border-dashed rounded-3xl p-8 md:p-12 text-center transition-all duration-300 ${
               isDragOver 
-                ? 'border-blue-400 bg-blue-50' 
-                : 'border-gray-300 bg-white/80 hover:border-gray-400 hover:bg-white/90'
+                ? 'border-stone-400 bg-stone-200/50' 
+                : 'border-white/80 bg-white/40 hover:border-stone-300 hover:bg-white/50'
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -129,16 +129,16 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadSuccess, onUploadErro
               }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              <Upload className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+              <Upload className="w-16 h-16 mx-auto mb-4 text-gray-700 drop-shadow-lg" />
             </motion.div>
             
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 drop-shadow-lg">
               Upload Your Outfit Photo
             </h3>
-            <p className="text-gray-500 mb-4">
+            <p className="text-gray-800 mb-4 text-lg font-medium drop-shadow-md">
               Drag and drop your image here, or click to browse
             </p>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-700 font-medium drop-shadow-sm">
               Supports JPG, PNG, GIF, WebP (max 16MB)
             </p>
           </motion.div>
@@ -147,19 +147,20 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadSuccess, onUploadErro
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-2xl p-6 shadow-lg"
+            className="relative bg-white/95 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20"
           >
             <div className="relative">
               <img
                 src={preview}
                 alt="Uploaded outfit"
-                className="w-full h-64 object-cover rounded-xl"
+                className="max-w-full max-h-80 w-auto h-auto object-contain rounded-2xl bg-white shadow-sm"
+                style={{ maxWidth: '500px', maxHeight: '400px' }}
               />
               
               {isUploading && (
-                <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
                   <div className="bg-white rounded-full p-4">
-                    <Loader2 className="w-8 h-8 text-blue-500 loading-spinner" />
+                    <Loader2 className="w-8 h-8 text-stone-600 loading-spinner" />
                   </div>
                 </div>
               )}
@@ -177,7 +178,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadSuccess, onUploadErro
               <h4 className="font-semibold text-gray-800 mb-1">
                 {uploadedFile?.name}
               </h4>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-600">
                 {(uploadedFile?.size && (uploadedFile.size / 1024 / 1024).toFixed(2))} MB
               </p>
             </div>

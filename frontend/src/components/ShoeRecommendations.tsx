@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { Sparkles, ChevronLeft, ChevronRight, Wand2 } from 'lucide-react';
 import { ShoeRecommendation } from '../types';
 
 interface ShoeRecommendationsProps {
   recommendations: ShoeRecommendation[];
-  onGenerateVisualizations: (shoes: ShoeRecommendation[]) => void;
-  isGenerating: boolean;
+  isGeneratingVisualizations: boolean;
 }
 
 const ShoeRecommendations: React.FC<ShoeRecommendationsProps> = ({
   recommendations,
-  onGenerateVisualizations,
-  isGenerating
+  isGeneratingVisualizations
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -63,7 +61,7 @@ const ShoeRecommendations: React.FC<ShoeRecommendationsProps> = ({
       transition={{ duration: 0.5 }}
       className="w-full max-w-4xl mx-auto"
     >
-      <div className="bg-white rounded-2xl shadow-lg p-8">
+      <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-6 md:p-8 border border-white/20">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 rounded-xl">
@@ -79,23 +77,14 @@ const ShoeRecommendations: React.FC<ShoeRecommendationsProps> = ({
             </div>
           </div>
           
-          <button
-            onClick={() => onGenerateVisualizations(recommendations)}
-            disabled={isGenerating}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {isGenerating ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full loading-spinner" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Eye className="w-4 h-4" />
-                Generate Visualizations
-              </>
-            )}
-          </button>
+          {isGeneratingVisualizations && (
+            <div className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 px-4 py-2 rounded-lg">
+              <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+              <span className="text-purple-700 font-medium text-sm">
+                Generating AI Visualizations...
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Shoe Navigation */}
@@ -135,7 +124,7 @@ const ShoeRecommendations: React.FC<ShoeRecommendationsProps> = ({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
-            className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8"
+            className="bg-gradient-to-br from-gray-50/80 to-gray-100/80 rounded-2xl p-6 md:p-8 backdrop-blur-sm"
           >
             <div className="flex items-start gap-6">
               <div className="flex-shrink-0">
@@ -216,6 +205,31 @@ const ShoeRecommendations: React.FC<ShoeRecommendationsProps> = ({
             ))}
           </div>
         </div>
+
+        {/* Background Generation Notice */}
+        {isGeneratingVisualizations && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-8 p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl"
+          >
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-lg">
+                <Wand2 className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-purple-800">
+                  AI Visualizations in Progress
+                </h4>
+                <p className="text-sm text-purple-600">
+                  We're generating realistic images of you wearing each recommended shoe. 
+                  This may take a few moments. You'll be automatically taken to the results when ready!
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );

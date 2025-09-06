@@ -52,7 +52,7 @@ const OutfitVisualization: React.FC<OutfitVisualizationProps> = ({ visualization
       transition={{ duration: 0.5 }}
       className="w-full max-w-6xl mx-auto"
     >
-      <div className="bg-white rounded-2xl shadow-lg p-8">
+      <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-6 md:p-8 border border-white/20">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="bg-gradient-to-r from-green-500 to-blue-500 p-3 rounded-xl">
@@ -104,7 +104,7 @@ const OutfitVisualization: React.FC<OutfitVisualizationProps> = ({ visualization
         </div>
 
         {/* Main Visualization */}
-        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 mb-6">
+        <div className="bg-gradient-to-br from-gray-50/80 to-gray-100/80 rounded-2xl p-6 mb-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-lg font-semibold text-gray-800">
               {currentVisualization?.angle.toUpperCase()} View
@@ -136,11 +136,14 @@ const OutfitVisualization: React.FC<OutfitVisualizationProps> = ({ visualization
               className="relative"
             >
               {currentVisualization?.image && (
-                <img
-                  src={currentVisualization.image}
-                  alt={`${currentShoe.shoe.name} - ${currentVisualization.angle} view`}
-                  className="w-full h-96 object-contain rounded-lg bg-white shadow-sm"
-                />
+                <div className="flex justify-center">
+                  <img
+                    src={currentVisualization.image}
+                    alt={`${currentShoe.shoe.name} - ${currentVisualization.angle} view`}
+                    className="max-w-full max-h-80 w-auto h-auto object-contain rounded-lg bg-white shadow-sm"
+                    style={{ maxWidth: '500px', maxHeight: '400px' }}
+                  />
+                </div>
               )}
             </motion.div>
           </AnimatePresence>
@@ -209,7 +212,7 @@ const OutfitVisualization: React.FC<OutfitVisualizationProps> = ({ visualization
         </div>
 
         {/* Shoe Details */}
-        <div className="mt-6 p-4 bg-gray-50 rounded-xl">
+        <div className="mt-6 p-4 bg-gray-50/80 rounded-2xl backdrop-blur-sm">
           <h4 className="font-semibold text-gray-800 mb-2">
             Why this shoe works:
           </h4>
