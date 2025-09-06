@@ -10,6 +10,7 @@ from werkzeug.utils import secure_filename
 from config import Config
 from utils import allowed_file
 from services.gemini_service import GeminiService
+from services.video_service import VideoService
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -20,6 +21,7 @@ Config.init_app(app)
 
 # Initialize services
 gemini_service = GeminiService()
+video_service = VideoService()
 
 
 @app.route('/health', methods=['GET'])
@@ -171,6 +173,76 @@ def generate_outfits_ai():
         "success": True,
         "results": results
     })
+
+@app.route('/generate-videos', methods=['POST'])
+def generate_videos():
+    """Generate videos for front angle images of recommended shoes"""
+    
+    data = request.json
+    image_id = data.get('image_id')
+    shoes = data.get('shoes', [])
+    
+    if not image_id or not shoes:
+        return jsonify({"error": "Missing image_id or shoes data"}), 400
+    
+    original_image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_id)
+    
+    if not os.path.exists(original_image_path):
+        return jsonify({"error": "Original image not found"}), 404
+    
+    try:
+        # Generate front angle images for all shoes first using AI image generation
+        front_angle_images = []
+        for i, shoe in enumerate(shoes):
+            shoe_desc = f"{shoe.get('brand', '')} {shoe.get('name', '')} in {shoe.get('color', '')}"
+            print(f"Generating front angle image for shoe {i+1}: {shoe_desc}")
+            front_image_path = gemini_service.generate_outfit_image_with_shoes(original_image_path, shoe_desc, 'front')
+            print(f"Generated image path: {front_image_path}")
+            
+            # Verify the generated image exists and is valid
+            if front_image_path and os.path.exists(front_image_path):
+                file_size = os.path.getsize(front_image_path)
+                print(f"Image file size: {file_size} bytes")
+                front_angle_images.append(front_image_path)
+            else:
+                print(f"Warning: Generated image not found or invalid: {front_image_path}")
+                # Use original image as fallback
+                front_angle_images.append(original_image_path)
+        
+        # Generate videos asynchronously
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        try:
+            results = loop.run_until_complete(
+                video_service.generate_videos_for_all_shoes(original_image_path, shoes, front_angle_images)
+            )
+        finally:
+            loop.close()
+        
+        # Convert results to JSON-serializable format
+        json_results = []
+        for result in results:
+            json_results.append({
+                "shoe": result.shoe,
+                "videos": [
+                    {
+                        "angle": video.angle,
+                        "video_url": video.video_url,
+                        "status": video.status
+                    }
+                    for video in result.videos
+                ]
+            })
+        
+        return jsonify({
+            "success": True,
+            "results": json_results
+        })
+        
+    except Exception as e:
+        print(f"Error in video generation: {str(e)}")
+        return jsonify({"error": f"Video generation failed: {str(e)}"}), 500
 
 @app.route('/test-gemini', methods=['GET'])
 def test_gemini():

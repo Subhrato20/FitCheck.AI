@@ -30,3 +30,19 @@ export interface GenerateOutfitsResponse {
 export interface ApiError {
   error: string;
 }
+
+export interface VideoGeneration {
+  angle: string;
+  video_url: string;
+  status: string;
+}
+
+export interface ShoeVideoGeneration {
+  shoe: ShoeRecommendation;
+  videos: VideoGeneration[];
+}
+
+export interface GenerateVideosResponse {
+  success: boolean;
+  results: ShoeVideoGeneration[];
+}

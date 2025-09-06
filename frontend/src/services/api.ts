@@ -59,6 +59,18 @@ export const generateOutfitsAI = async (imageId: string, shoes: ShoeRecommendati
   return response.data.results;
 };
 
+export const generateVideos = async (imageId: string, shoes: ShoeRecommendation[]): Promise<any[]> => {
+  const response = await axios.post(`${API_BASE_URL}/generate-videos`, {
+    image_id: imageId,
+    shoes: shoes,
+  }, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return response.data.results;
+};
+
 export const healthCheck = async (): Promise<boolean> => {
   try {
     await axios.get(`${API_BASE_URL}/health`);

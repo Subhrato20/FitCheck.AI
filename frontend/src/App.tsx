@@ -2,17 +2,21 @@ import React, { useState, useEffect } from 'react';
 import ImageUpload from './components/ImageUpload';
 import ShoeRecommendations from './components/ShoeRecommendations';
 import OutfitVisualization from './components/OutfitVisualization';
-import { generateOutfitsAI, healthCheck } from './services/api';
-import { ShoeRecommendation, ShoeVisualization, UploadResponse } from './types';
+import VideoVisualization from './components/VideoVisualization';
+import { generateOutfitsAI, generateVideos, healthCheck } from './services/api';
+import { ShoeRecommendation, ShoeVisualization, ShoeVideoGeneration, UploadResponse } from './types';
 
 const App: React.FC = () => {
-  const [step, setStep] = useState<'upload' | 'recommendations' | 'visualizations'>('upload');
+  const [step, setStep] = useState<'upload' | 'recommendations' | 'visualizations' | 'videos'>('upload');
   const [recommendations, setRecommendations] = useState<ShoeRecommendation[]>([]);
   const [visualizations, setVisualizations] = useState<ShoeVisualization[]>([]);
+  const [videoGenerations, setVideoGenerations] = useState<ShoeVideoGeneration[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingVisualizations, setIsGeneratingVisualizations] = useState(false);
+  const [isGeneratingVideos, setIsGeneratingVideos] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [backendStatus, setBackendStatus] = useState<'checking' | 'online' | 'offline'>('checking');
+  const [currentImageId, setCurrentImageId] = useState<string>('');
 
   useEffect(() => {
     checkBackendStatus();
@@ -25,6 +29,7 @@ const App: React.FC = () => {
 
   const handleUploadSuccess = async (data: UploadResponse) => {
     setRecommendations(data.recommendations);
+    setCurrentImageId(data.image_id);
     setStep('recommendations');
     setIsLoading(false); // Stop loading for recommendations
     
@@ -38,11 +43,28 @@ const App: React.FC = () => {
       const results = await generateOutfitsAI(imageId, shoes);
       setVisualizations(results);
       setStep('visualizations');
+      
+      // Automatically start generating videos after visualizations are complete
+      generateVideosAsync(imageId, shoes);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to generate visualizations. Please try again.');
       // Stay on recommendations step if generation fails
     } finally {
       setIsGeneratingVisualizations(false);
+    }
+  };
+
+  const generateVideosAsync = async (imageId: string, shoes: ShoeRecommendation[]) => {
+    try {
+      setIsGeneratingVideos(true);
+      const results = await generateVideos(imageId, shoes);
+      setVideoGenerations(results);
+      // Don't automatically switch to videos step - let user choose when to view them
+    } catch (err: any) {
+      console.error('Video generation failed:', err);
+      // Don't show error to user since this is background processing
+    } finally {
+      setIsGeneratingVideos(false);
     }
   };
 
@@ -52,12 +74,37 @@ const App: React.FC = () => {
   };
 
 
+  const handleLiveCheck = () => {
+    // Simply navigate to videos step - videos should already be generated in background
+    if (videoGenerations.length > 0) {
+      setStep('videos');
+    } else if (isGeneratingVideos) {
+      // If still generating, show a message
+      setError('Videos are still being generated. Please wait a moment and try again.');
+    } else {
+      // If no videos and not generating, start generation now
+      generateVideosAsync(currentImageId, recommendations);
+      setStep('videos');
+    }
+  };
+
+  const handleBackToRecommendations = () => {
+    setStep('recommendations');
+  };
+
+  const handleBackToVisualizations = () => {
+    setStep('visualizations');
+  };
+
   const resetApp = () => {
     setStep('upload');
     setRecommendations([]);
     setVisualizations([]);
+    setVideoGenerations([]);
     setError(null);
     setIsGeneratingVisualizations(false);
+    setIsGeneratingVideos(false);
+    setCurrentImageId('');
   };
 
   return (
@@ -92,12 +139,13 @@ const App: React.FC = () => {
 
       {/* Navigation Steps */}
       <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8 mb-8 md:mb-12">
-        {['upload', 'recommendations', 'visualizations'].map((s, index) => (
+        {['upload', 'recommendations', 'visualizations', 'videos'].map((s, index) => (
           <div key={s} className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
               step === s || 
               (s === 'recommendations' && (recommendations.length > 0 || isLoading)) ||
-              (s === 'visualizations' && visualizations.length > 0)
+              (s === 'visualizations' && visualizations.length > 0) ||
+              (s === 'videos' && (videoGenerations.length > 0 || isGeneratingVideos))
               ? 'bg-white text-stone-700 shadow-lg' : 'bg-white/20 text-stone-600/70'
             }`}>
               {index + 1}
@@ -107,7 +155,8 @@ const App: React.FC = () => {
             }`}>
               {s === 'upload' ? 'Upload Photo' : 
                s === 'recommendations' ? 'Processing...' : 
-               'View AI Try-On'}
+               s === 'visualizations' ? 'View AI Try-On' :
+               isGeneratingVideos ? 'Generating Videos...' : 'Live Check Videos'}
             </span>
           </div>
         ))}
@@ -121,13 +170,14 @@ const App: React.FC = () => {
       )}
 
       {/* Loading Overlay */}
-      {isLoading && (
+      {(isLoading || isGeneratingVideos) && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white/95 backdrop-blur-sm p-8 rounded-2xl text-center shadow-2xl border border-white/20">
             <div className="w-12 h-12 border-4 border-gray-200 border-t-stone-600 rounded-full mx-auto mb-6 animate-spin" />
             <p className="text-gray-700 text-lg font-medium">
               {step === 'upload' ? 'Analyzing your outfit...' :
                step === 'recommendations' ? 'Generating AI visualizations in background...' :
+               step === 'videos' ? 'Generating live fit check videos...' :
                'Processing...'}
             </p>
           </div>
@@ -158,11 +208,24 @@ const App: React.FC = () => {
         )}
 
         {step === 'visualizations' && visualizations.length > 0 && (
-          <OutfitVisualization visualizations={visualizations} />
+          <OutfitVisualization 
+            visualizations={visualizations} 
+            onLiveCheck={handleLiveCheck}
+            isGeneratingVideos={isGeneratingVideos}
+            hasVideos={videoGenerations.length > 0}
+            onBackToRecommendations={handleBackToRecommendations}
+          />
+        )}
+
+        {step === 'videos' && videoGenerations.length > 0 && (
+          <VideoVisualization 
+            videoGenerations={videoGenerations} 
+            onBackToVisualizations={handleBackToVisualizations}
+          />
         )}
 
         {/* Back/Reset Button */}
-        {(step === 'recommendations' || step === 'visualizations') && (
+        {(step === 'recommendations' || step === 'visualizations' || step === 'videos') && (
           <div className="text-center mt-8">
             <button
               onClick={resetApp}

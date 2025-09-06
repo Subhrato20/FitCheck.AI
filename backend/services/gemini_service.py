@@ -78,7 +78,7 @@ class GeminiService:
             )
             
             # Create the prompt for Gemini
-            prompt = """You are a fashion expert AI assistant. Analyze the outfit in this image and recommend exactly 4 shoes that would perfectly complement the style.
+            prompt = """You are a fashion expert AI assistant. Analyze the outfit in this image and recommend exactly 2 shoes that would perfectly complement the style.
 
             Consider:
             - The outfit's style, colors, and formality level
@@ -86,7 +86,7 @@ class GeminiService:
             - Versatility and practicality
             - The overall aesthetic and vibe
 
-            Return exactly 4 shoe recommendations that would work well with this outfit. Use the recommend_shoes function to provide your recommendations."""
+            Return exactly 2 shoe recommendations that would work well with this outfit. Use the recommend_shoes function to provide your recommendations."""
             
             # Generate response with function calling
             response = self.gemini_pro_vision.generate_content(
@@ -101,9 +101,9 @@ class GeminiService:
             # Clean up temp file
             clean_temp_file(temp_path)
             
-            # Ensure we have exactly 4 recommendations
+            # Ensure we have exactly 2 recommendations
             from utils import ensure_shoe_count
-            shoes = ensure_shoe_count(shoes, 4)
+            shoes = ensure_shoe_count(shoes, 2)
             
             return shoes
             
@@ -183,8 +183,12 @@ class GeminiService:
         """Generate actual image of person wearing the recommended shoes using Gemini 2.5 Flash Image Preview"""
         
         try:
+            print(f"Starting image generation for: {shoe_description} - {angle} angle")
+            print(f"Original image path: {original_image_path}")
+            
             # Prepare image for processing
             temp_path = prepare_image_for_processing(original_image_path, Config.VIZ_MAX_IMAGE_SIZE)
+            print(f"Prepared temp image path: {temp_path}")
             
             # Read and encode the original image
             with open(temp_path, 'rb') as image_file:
@@ -256,6 +260,7 @@ class GeminiService:
                     generated_image_path = filepath
                     file_index += 1
                     print(f"Generated image saved to: {filepath}")
+                    print(f"Image data size: {len(data_buffer)} bytes")
                     
                 elif chunk.candidates[0].content.parts[0].text:
                     print(f"AI Response: {chunk.candidates[0].content.parts[0].text}")

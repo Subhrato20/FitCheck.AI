@@ -24,6 +24,9 @@ class Config:
     # Google Gemini API configuration
     GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
     
+    # FAL API configuration
+    FAL_KEY = os.getenv('FAL_KEY')
+    
     # Gemini model names
     GEMINI_PRO_VISION_MODEL = 'gemini-2.5-pro'
     GEMINI_FLASH_MODEL = 'gemini-2.5-flash'

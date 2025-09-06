@@ -7,6 +7,7 @@ import os
 import pathlib
 from glob import glob
 import time
+from config import Config
 
 # Configuration
 UPLOAD_FOLDER = "backend/uploads"
@@ -16,10 +17,11 @@ SHOE_NAME = "White Nike AirForce One"
 # Create output directory if it doesn't exist
 pathlib.Path(OUTPUT_FOLDER).mkdir(parents=True, exist_ok=True)
 
-def on_queue_update(update):
-    if isinstance(update, fal_client.InProgress) and update.logs:
-        for log in update.logs:
-            print(f"[LOG] {log['message']}")
+# Configure FAL client with API key from environment
+if Config.FAL_KEY:
+    fal_client.api_key = Config.FAL_KEY
+else:
+    print("Warning: FAL_KEY not found in environment variables. Video generation may fail.")
 
 def process_image(image_path, output_filename, shoe_name):
     """Process a single image and generate a video"""
@@ -34,7 +36,7 @@ def process_image(image_path, output_filename, shoe_name):
 
         # Generate the video with the original prompt
         print(f"Generating video for {os.path.basename(image_path)}...")
-        result = fal_client.subscribe(
+        result = fal_client.run(
             "fal-ai/veo3/fast/image-to-video",
             arguments={
                 "prompt": f"A cinematic video of a person doing a casual fit check in front of a mirror. The camera smoothly rotates to capture front, back, left, and right views. The environment is bright, well-lit, and stylish. The focus is primarily on the sneakers: close-up shots, slow pans, zooms, and dramatic angles highlight how the sneakers pair with the outfit. Do not change anything about the shoe — its design, color, and details must remain exactly the same. They are wearing {shoe_name}. The rest of the clothing remains secondary, slightly blurred or framed to keep attention on the sneakers. Natural gestures, like adjusting pants or shifting weight, emphasize the sneakers as the centerpiece of the drip.",
@@ -42,9 +44,7 @@ def process_image(image_path, output_filename, shoe_name):
                 "duration": "8s",
                 "generate_audio": False,
                 "resolution": "720p",
-            },
-            with_logs=True,
-            on_queue_update=on_queue_update,
+            }
         )
 
         # Save the video
