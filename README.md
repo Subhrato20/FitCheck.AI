@@ -1,39 +1,56 @@
-# FitCheck.AI - AI-Powered Shoe Recommendation & Outfit Visualization
+# FitCheck.AI - Complete AI Fashion Assistant
 
-An intelligent fashion app that analyzes your outfit photos using **Google Gemini 2.5 Pro** to recommend perfect shoe matches, then uses **Gemini 2.5 Flash (Nano Banana)** to generate visualizations of how you'd look wearing each recommended shoe from multiple angles.
+An intelligent fashion platform that analyzes your outfit photos and provides comprehensive shoe recommendations with AI-powered visualizations, video try-ons, and product search capabilities.
 
 ## 🌟 Features
 
-- **Smart Photo Upload**: Upload your outfit photo with drag-and-drop support
-- **AI Shoe Recommendations**: Powered by **Gemini 2.5 Pro** with function calling for structured shoe recommendations
-- **Multi-Angle Visualization**: Uses **Gemini 2.5 Flash** to generate outfit visualizations from front, back, left, and right angles
-- **Beautiful UI**: Modern, responsive React TypeScript interface with smooth animations
-- **Real-time Processing**: Fast AI-powered analysis using Google's latest Gemini models
+### Core AI Capabilities
+- **Smart Photo Upload**: Drag-and-drop outfit photo upload with validation
+- **AI Shoe Recommendations**: Powered by **Google Gemini 2.5 Pro** with structured function calling
+- **Multi-Angle Visualizations**: AI-generated outfit views from front, back, left, and right angles
+- **Live Fit Check Videos**: Cinematic video generation using **FAL AI Veo3** for dynamic try-on experience
+- **Product Search**: Real-time shoe shopping integration with **Exa AI** web search
+
+### User Experience
+- **Modern UI/UX**: Beautiful React TypeScript interface with smooth animations
+- **Interactive Navigation**: Seamless flow between recommendations, visualizations, videos, and shopping
+- **Real-time Processing**: Fast AI-powered analysis with progress indicators
+- **Mobile Responsive**: Optimized for desktop and mobile devices
+- **Download Capabilities**: Save generated images and videos locally
 
 ## 🚀 Tech Stack
 
-### AI Models
-- **Gemini 2.5 Pro**: For intelligent shoe recommendations using function calling
-- **Gemini 2.5 Flash (Nano Banana)**: For generating outfit visualizations
+### AI Services
+- **Google Gemini 2.5 Pro**: Intelligent shoe recommendations with function calling
+- **Google Gemini 2.5 Flash**: Multi-angle outfit visualizations
+- **FAL AI Veo3**: Cinematic video generation for live fit checks
+- **Exa AI**: Real-time web search for product discovery
 
 ### Backend
-- **Flask**: Python web framework
+- **Flask**: Python web framework with modular architecture
 - **Google Generative AI SDK**: Official Google SDK for Gemini models
-- **Pillow**: Image processing
+- **FAL Client**: Video generation API integration
+- **Exa Python SDK**: Web search and product discovery
+- **Pillow**: Image processing and manipulation
 - **Flask-CORS**: Cross-origin resource sharing
+- **Concurrent Processing**: Async video generation with ThreadPoolExecutor
 
 ### Frontend
-- **React**: UI framework
-- **TypeScript**: Type-safe JavaScript
-- **Vite**: Build tool and dev server
-- **Framer Motion**: Animation library
-- **Lucide React**: Icon library
+- **React 18**: Modern UI framework with hooks
+- **TypeScript**: Type-safe development
+- **Vite**: Fast build tool and dev server
+- **Framer Motion**: Smooth animations and transitions
+- **Lucide React**: Beautiful icon library
+- **Axios**: HTTP client for API communication
+- **Custom CSS**: Modern glassmorphism and responsive design
 
 ## 📋 Prerequisites
 
 - Python 3.8+ 
 - Node.js 16+
-- Google API Key (for Gemini models)
+- **Google API Key** (for Gemini models)
+- **FAL AI API Key** (for video generation)
+- **Exa API Key** (for product search)
 
 ## 🔧 Installation
 
@@ -60,9 +77,11 @@ pip install -r requirements.txt
 cp env.template .env
 ```
 
-5. Edit `.env` and add your Google API key:
-```
-GOOGLE_API_KEY=your_actual_google_api_key_here
+5. Edit `.env` and add your API keys:
+```env
+GOOGLE_API_KEY=your_google_api_key_here
+FAL_KEY=your_fal_ai_api_key_here
+EXA_API_KEY=your_exa_api_key_here
 ```
 
 6. Run the Flask server:
@@ -95,77 +114,114 @@ The frontend will start on `http://localhost:5173`
 
 ## 📝 How to Use
 
-1. **Upload Photo**: Click or drag-drop your outfit photo into the upload zone
-2. **Get Recommendations**: Gemini 2.5 Pro analyzes your outfit and suggests 4 complementary shoes with:
-   - Shoe name
-   - Brand
-   - Color
-   - Style type
-   - Reason for recommendation
-3. **View Visualizations**: Click "Generate Outfit Visualizations" to see AI-generated views
-4. **Explore Angles**: Switch between front, back, left, and right views for each shoe
-5. **Navigate Shoes**: Use the navigation buttons or tabs to switch between different shoe recommendations
+### Complete Workflow
+1. **Upload Photo**: Drag-and-drop your outfit photo into the upload zone
+2. **Get AI Recommendations**: Gemini 2.5 Pro analyzes your outfit and suggests 4 complementary shoes with detailed reasoning
+3. **View Visualizations**: Automatically generated multi-angle outfit views (front, back, left, right)
+4. **Watch Live Videos**: Cinematic fit check videos showing dynamic try-on experience
+5. **Shop Products**: Search and find where to buy recommended shoes online
+6. **Download Content**: Save generated images and videos locally
 
-## 🔑 Getting a Google API Key
+### Navigation Flow
+- **Recommendations** → **Visualizations** → **Videos** → **Product Search**
+- Seamless transitions between all features
+- Back navigation and "Start Over" functionality
 
+## 🔑 Getting API Keys
+
+### Google API Key (Gemini)
 1. Visit [Google AI Studio](https://makersuite.google.com/)
 2. Sign in with your Google account
 3. Navigate to [Get API Key](https://makersuite.google.com/app/apikey)
 4. Create a new API key
 5. Copy the key and add it to your `.env` file
 
+### FAL AI API Key (Video Generation)
+1. Visit [FAL AI](https://fal.ai/)
+2. Sign up for an account
+3. Navigate to your API keys section
+4. Create a new API key
+5. Copy the key and add it to your `.env` file
+
+### Exa API Key (Product Search)
+1. Visit [Exa](https://exa.ai/)
+2. Sign up for an account
+3. Navigate to your API keys section
+4. Create a new API key
+5. Copy the key and add it to your `.env` file
+
 ## 🎯 How It Works
 
-### Shoe Recommendation Flow (Gemini 2.5 Pro)
-1. User uploads outfit photo
-2. Image is processed and sent to Gemini 2.5 Pro
-3. Uses **function calling** to ensure structured output with exactly 4 shoe recommendations
-4. Each recommendation includes brand, name, color, style, and reasoning
+### AI Processing Pipeline
+1. **Photo Upload**: User uploads outfit photo with validation
+2. **Shoe Analysis**: Gemini 2.5 Pro analyzes outfit and recommends 4 complementary shoes
+3. **Visualization Generation**: Gemini 2.5 Flash creates multi-angle outfit views
+4. **Video Creation**: FAL AI Veo3 generates cinematic fit check videos
+5. **Product Search**: Exa AI searches for recommended shoes online
 
-### Visualization Generation (Gemini 2.5 Flash)
-1. For each recommended shoe, generates 4 angle views
-2. Uses the original photo + shoe description
-3. Creates visualization showing how the outfit would look with the recommended shoes
-4. Provides detailed descriptions of the visual harmony
+### Technical Architecture
+- **Modular Backend**: Separated services for Gemini, FAL, and Exa integrations
+- **Concurrent Processing**: Parallel video generation for better performance
+- **Real-time Updates**: Live progress indicators and status updates
+- **Error Handling**: Graceful fallbacks and user-friendly error messages
 
 ## 📂 Project Structure
 
 ```
 FitCheck.AI/
 ├── backend/
-│   ├── app.py              # Flask application with Gemini integration
-│   ├── requirements.txt    # Python dependencies
-│   ├── env.template        # Environment variables template
-│   ├── uploads/            # Uploaded images (auto-created)
-│   └── generated/          # Generated visualizations (auto-created)
+│   ├── app.py                    # Main Flask application with all routes
+│   ├── config.py                 # Application configuration
+│   ├── models.py                 # Data models and structures
+│   ├── utils.py                  # Utility functions
+│   ├── ImageToVideo.py           # Video generation utilities
+│   ├── services/                 # Business logic services
+│   │   ├── gemini_service.py     # Google Gemini AI integration
+│   │   ├── video_service.py      # FAL AI video generation
+│   │   └── exa_service.py        # Exa AI product search
+│   ├── uploads/                  # Uploaded images (auto-created)
+│   ├── generated/                # Generated visualizations (auto-created)
+│   ├── generated_videos/         # Generated videos (auto-created)
+│   └── requirements.txt          # Python dependencies
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── components/     # React components
+│   │   ├── components/           # React components
 │   │   │   ├── ImageUpload.tsx
 │   │   │   ├── ShoeRecommendations.tsx
-│   │   │   └── OutfitVisualization.tsx
-│   │   ├── types.ts        # TypeScript types
-│   │   ├── App.tsx         # Main app component
-│   │   └── *.css           # Styling files
-│   ├── package.json        # Node dependencies
-│   └── vite.config.ts      # Vite configuration
+│   │   │   ├── OutfitVisualization.tsx
+│   │   │   ├── VideoVisualization.tsx
+│   │   │   └── ProductSearch.tsx
+│   │   ├── services/             # API services
+│   │   │   └── api.ts
+│   │   ├── types/                # TypeScript type definitions
+│   │   │   └── index.ts
+│   │   ├── utils/                # Utility functions
+│   │   │   └── cn.ts
+│   │   ├── App.tsx               # Main app component
+│   │   └── main.tsx              # App entry point
+│   ├── package.json              # Node dependencies
+│   └── vite.config.ts            # Vite configuration
 │
-└── README.md               # This file
+└── README.md                     # This file
 ```
 
 ## 🔧 API Endpoints
 
-### Backend Endpoints
-
+### Core Endpoints
 - `GET /health` - Health check endpoint
-- `POST /upload` - Upload outfit image and get Gemini 2.5 Pro shoe recommendations
-- `POST /generate-outfits` - Generate outfit visualizations using Gemini 2.5 Flash
+- `POST /upload` - Upload outfit image and get AI shoe recommendations
+- `POST /generate-outfits-ai` - Generate AI-powered outfit visualizations
+- `POST /generate-videos` - Generate cinematic fit check videos
+- `POST /search-products` - Search for recommended shoes online
+
+### Testing Endpoints
 - `GET /test-gemini` - Test Gemini API connection
+- `GET /test-exa` - Test Exa API connection
 
 ### Request/Response Examples
 
-#### Upload Image
+#### Upload Image & Get Recommendations
 ```json
 // Request: POST /upload
 // Body: FormData with 'image' field
@@ -187,9 +243,9 @@ FitCheck.AI/
 }
 ```
 
-#### Generate Visualizations
+#### Generate AI Visualizations
 ```json
-// Request: POST /generate-outfits
+// Request: POST /generate-outfits-ai
 {
   "image_id": "unique_filename.jpg",
   "shoes": [/* shoe recommendations */]
@@ -214,6 +270,62 @@ FitCheck.AI/
 }
 ```
 
+#### Generate Videos
+```json
+// Request: POST /generate-videos
+{
+  "image_id": "unique_filename.jpg",
+  "shoes": [/* shoe recommendations */]
+}
+
+// Response:
+{
+  "success": true,
+  "results": [
+    {
+      "shoe": {/* shoe details */},
+      "videos": [
+        {
+          "angle": "front",
+          "video_url": "data:video/mp4;base64,...",
+          "status": "completed"
+        }
+      ]
+    }
+    // ... other shoes
+  ]
+}
+```
+
+#### Search Products
+```json
+// Request: POST /search-products
+{
+  "shoes": [/* shoe recommendations */],
+  "outfit_description": "casual outfit"
+}
+
+// Response:
+{
+  "success": true,
+  "results": [
+    {
+      "shoe": {/* shoe details */},
+      "search_results": [
+        {
+          "url": "https://example.com/shoe",
+          "title": "Nike Air Max 90",
+          "description": "Classic sneaker...",
+          "source": "nike.com"
+        }
+        // ... more results
+      ]
+    }
+    // ... other shoes
+  ]
+}
+```
+
 ## ⚙️ Configuration
 
 ### Environment Variables
@@ -221,7 +333,12 @@ FitCheck.AI/
 Create a `.env` file in the backend directory with:
 
 ```env
+# Required API Keys
 GOOGLE_API_KEY=your_google_api_key_here
+FAL_KEY=your_fal_ai_api_key_here
+EXA_API_KEY=your_exa_api_key_here
+
+# Optional Settings
 FLASK_ENV=development
 FLASK_DEBUG=True
 ```
@@ -232,37 +349,43 @@ The backend is configured to accept requests from:
 - `http://localhost:5173` (Vite default)
 - `http://localhost:3000` (Alternative port)
 
-Modify `app.py` if you need different origins.
+Modify `config.py` if you need different origins.
 
 ## 🎯 Future Enhancements
 
-- **Full Image Generation**: When Gemini 2.5 Flash (Nano Banana) image generation becomes available
-- **Real-time Try-On**: Live AR visualization using device camera
-- **Shoe Database**: Connect to real shoe retailers for purchase links
+- **AR Try-On**: Live augmented reality visualization using device camera
 - **User Profiles**: Save favorite recommendations and outfit history
 - **Social Sharing**: Share outfit combinations with friends
 - **Style Learning**: AI learns your preferences over time
+- **Advanced Filters**: Filter recommendations by price, brand, style preferences
+- **Outfit History**: Track and analyze your fashion choices over time
 
 ## 🐛 Troubleshooting
 
 ### Backend Issues
 
-1. **Google API Error**: Ensure your API key is valid and has Gemini API access enabled
+1. **API Key Errors**: Ensure all API keys are valid and have proper access:
+   - Google API key has Gemini API access enabled
+   - FAL AI key has video generation permissions
+   - Exa API key has search permissions
 2. **Import Errors**: Make sure all pip packages are installed: `pip install -r requirements.txt`
-3. **Model Access**: Ensure your API key has access to both Gemini 2.5 Pro and Flash models
+3. **Video Generation Fails**: Check FAL AI API key and quota limits
+4. **Product Search Fails**: Verify Exa API key and fallback to default results
 
 ### Frontend Issues
 
 1. **CORS Errors**: Ensure backend is running and CORS is configured
 2. **Build Errors**: Clear node_modules and reinstall: `rm -rf node_modules && npm install`
 3. **API Connection**: Check that backend is running on port 8080
+4. **Video Playback Issues**: Ensure browser supports MP4 video format
 
 ## 🚀 Performance Tips
 
-- Images are automatically resized for optimal Gemini processing
-- Function calling ensures consistent structured output
-- Batch processing for multiple angle generation
-- Caching can be implemented for repeated requests
+- **Image Optimization**: Images are automatically resized for optimal AI processing
+- **Concurrent Processing**: Parallel video generation for faster results
+- **Function Calling**: Ensures consistent structured output from Gemini
+- **Fallback Systems**: Graceful degradation when services are unavailable
+- **Caching**: Can be implemented for repeated requests to improve performance
 
 ## 📄 License
 
@@ -278,4 +401,9 @@ For issues or questions, please create an issue in the GitHub repository.
 
 ---
 
-Built with ❤️ using Google's Gemini AI models for next-generation fashion technology
+Built with ❤️ using cutting-edge AI technology:
+- **Google Gemini** for intelligent recommendations and visualizations
+- **FAL AI Veo3** for cinematic video generation
+- **Exa AI** for real-time product discovery
+
+*Next-generation fashion technology powered by AI*
