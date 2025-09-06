@@ -17,7 +17,7 @@ import google.generativeai as genai
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173", "http://localhost:3000", "http://localhost:8080"])
+CORS(app, origins=["http://localhost:5173", "http://localhost:5174", "http://localhost:3000", "http://localhost:8080"])
 
 # Configuration
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size

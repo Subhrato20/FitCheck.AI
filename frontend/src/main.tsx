@@ -1,10 +1,13 @@
 import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
+import { createRoot } from 'react-dom/client'
+import App from './App'
 import './index.css'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const el = document.getElementById('root')
+if (!el) throw new Error('Missing #root in index.html')
+
+createRoot(el).render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>,
+  </React.StrictMode>
 )

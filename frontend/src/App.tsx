@@ -1,217 +1,289 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, AlertCircle, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import ImageUpload from './components/ImageUpload';
 import ShoeRecommendations from './components/ShoeRecommendations';
 import OutfitVisualization from './components/OutfitVisualization';
-import { UploadResponse, ShoeRecommendation, ShoeVisualization } from './types';
-import axios from 'axios';
-
-type AppState = 'upload' | 'recommendations' | 'visualizations';
+import { generateOutfits, healthCheck } from './services/api';
+import { ShoeRecommendation, ShoeVisualization, UploadResponse } from './types';
 
 const App: React.FC = () => {
-  const [appState, setAppState] = useState<AppState>('upload');
+  const [step, setStep] = useState<'upload' | 'recommendations' | 'visualizations'>('upload');
+  const [imageId, setImageId] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<ShoeRecommendation[]>([]);
   const [visualizations, setVisualizations] = useState<ShoeVisualization[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [backendStatus, setBackendStatus] = useState<'checking' | 'online' | 'offline'>('checking');
 
-  // Debug: Log when component mounts
-  React.useEffect(() => {
-    console.log('FitCheck.AI App mounted successfully!');
+  useEffect(() => {
+    checkBackendStatus();
   }, []);
 
+  const checkBackendStatus = async () => {
+    const isOnline = await healthCheck();
+    setBackendStatus(isOnline ? 'online' : 'offline');
+  };
+
   const handleUploadSuccess = (data: UploadResponse) => {
+    setImageId(data.image_id);
     setRecommendations(data.recommendations);
-    setAppState('recommendations');
-    setError(null);
-    setSuccess('Image uploaded successfully! AI is analyzing your outfit...');
-    
-    // Clear success message after 3 seconds
-    setTimeout(() => setSuccess(null), 3000);
+    setStep('recommendations');
+    setIsLoading(false);
   };
 
   const handleUploadError = (errorMessage: string) => {
     setError(errorMessage);
-    setAppState('upload');
-    
-    // Clear error message after 5 seconds
-    setTimeout(() => setError(null), 5000);
+    setIsLoading(false);
   };
 
   const handleGenerateVisualizations = async (shoes: ShoeRecommendation[]) => {
-    setIsGenerating(true);
-    setError(null);
+    if (!imageId) return;
     
+    setIsLoading(true);
+    setError(null);
+
     try {
-      // Get the image_id from the first recommendation (we'll need to store this)
-      // For now, we'll use a placeholder - in a real app, you'd store this from upload
-      const response = await axios.post('http://localhost:8080/generate-outfits', {
-        image_id: 'placeholder', // This should be stored from upload response
-        shoes: shoes
-      });
-      
-      setVisualizations(response.data.results);
-      setAppState('visualizations');
-      setSuccess('Visualizations generated successfully!');
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (error) {
-      console.error('Visualization generation error:', error);
-      setError('Failed to generate visualizations. Please try again.');
-      
-      // Clear error message after 5 seconds
-      setTimeout(() => setError(null), 5000);
+      const results = await generateOutfits(imageId, shoes);
+      setVisualizations(results);
+      setStep('visualizations');
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to generate visualizations. Please try again.');
     } finally {
-      setIsGenerating(false);
+      setIsLoading(false);
     }
   };
 
-  const handleReset = () => {
-    setAppState('upload');
+  const resetApp = () => {
+    setStep('upload');
+    setImageId(null);
     setRecommendations([]);
     setVisualizations([]);
     setError(null);
-    setSuccess(null);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700">
-      {/* Debug: Simple test to ensure React is working */}
-      <div style={{ position: 'fixed', top: '10px', right: '10px', background: 'rgba(0,0,0,0.8)', color: 'white', padding: '10px', borderRadius: '5px', fontSize: '12px', zIndex: 9999 }}>
-        React App Status: ✅ Active
-      </div>
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      padding: '20px',
+      fontFamily: 'system-ui, -apple-system, sans-serif'
+    }}>
       {/* Header */}
-      <header className="bg-white/10 backdrop-blur-md border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-white/20 p-3 rounded-xl">
-                <Sparkles className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white">
-                  FitCheck.AI
-                </h1>
-                <p className="text-white/80 text-sm">
-                  AI-Powered Shoe Recommendations
-                </p>
-              </div>
+      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+        <h1 style={{ 
+          fontSize: '3rem', 
+          color: 'white', 
+          marginBottom: '10px',
+          textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}>
+          FitCheck.AI
+        </h1>
+        <p style={{ 
+          fontSize: '1.2rem', 
+          color: 'rgba(255, 255, 255, 0.9)' 
+        }}>
+          AI-Powered Shoe Recommendations with Visual Try-On
+        </p>
+        
+        {/* Backend Status */}
+        <div style={{ 
+          marginTop: '20px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '8px 16px',
+          borderRadius: '20px',
+          background: backendStatus === 'online' ? 'rgba(34, 197, 94, 0.2)' : 
+                      backendStatus === 'offline' ? 'rgba(239, 68, 68, 0.2)' : 
+                      'rgba(251, 191, 36, 0.2)',
+          color: 'white'
+        }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: backendStatus === 'online' ? '#22c55e' : 
+                       backendStatus === 'offline' ? '#ef4444' : 
+                       '#fbbf24'
+          }} />
+          <span style={{ fontSize: '0.9rem' }}>
+            Backend: {backendStatus === 'checking' ? 'Checking...' : 
+                     backendStatus === 'online' ? 'Connected' : 
+                     'Offline (Start backend on port 8080)'}
+          </span>
+        </div>
+      </div>
+
+      {/* Navigation Steps */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        marginBottom: '40px',
+        gap: '20px'
+      }}>
+        {['upload', 'recommendations', 'visualizations'].map((s, index) => (
+          <div key={s} style={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            gap: '10px'
+          }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              background: step === s || 
+                         (s === 'recommendations' && recommendations.length > 0) ||
+                         (s === 'visualizations' && visualizations.length > 0)
+                         ? 'white' : 'rgba(255, 255, 255, 0.3)',
+              color: step === s ? '#764ba2' : 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 'bold',
+              transition: 'all 0.3s ease'
+            }}>
+              {index + 1}
             </div>
-            
-            {appState !== 'upload' && (
-              <button
-                onClick={handleReset}
-                className="bg-white/20 text-white px-4 py-2 rounded-xl hover:bg-white/30 transition-colors"
-              >
-                Upload New Photo
-              </button>
-            )}
+            <span style={{ 
+              color: 'white', 
+              fontWeight: step === s ? 'bold' : 'normal',
+              opacity: step === s ? 1 : 0.7
+            }}>
+              {s === 'upload' ? 'Upload Photo' : 
+               s === 'recommendations' ? 'Get Recommendations' : 
+               'View Try-On'}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Error Display */}
+      {error && (
+        <div style={{
+          maxWidth: '600px',
+          margin: '0 auto 20px',
+          padding: '15px',
+          background: 'rgba(239, 68, 68, 0.9)',
+          color: 'white',
+          borderRadius: '10px',
+          textAlign: 'center'
+        }}>
+          {error}
+        </div>
+      )}
+
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'white',
+            padding: '30px',
+            borderRadius: '15px',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              width: '50px',
+              height: '50px',
+              border: '4px solid #e5e7eb',
+              borderTop: '4px solid #764ba2',
+              borderRadius: '50%',
+              margin: '0 auto 20px',
+              animation: 'spin 1s linear infinite'
+            }} />
+            <p style={{ color: '#374151', fontSize: '1.1rem' }}>
+              {step === 'upload' ? 'Analyzing your outfit...' :
+               step === 'recommendations' ? 'Generating visualizations...' :
+               'Processing...'}
+            </p>
           </div>
         </div>
-      </header>
+      )}
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Status Messages */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3"
-            >
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <span>{error}</span>
-            </motion.div>
-          )}
-          
-          {success && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl flex items-center gap-3"
-            >
-              <CheckCircle className="w-5 h-5 flex-shrink-0" />
-              <span>{success}</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* App Content */}
-        <AnimatePresence mode="wait">
-          {appState === 'upload' && (
-            <motion.div
-              key="upload"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="text-center mb-8">
-                <h2 className="text-4xl font-bold text-white mb-4">
-                  Find Your Perfect Shoes
-                </h2>
-                <p className="text-xl text-white/90 max-w-2xl mx-auto">
-                  Upload a photo of your outfit and let our AI powered by Google Gemini 
-                  recommend the perfect shoes to complete your look.
-                </p>
-              </div>
-              
-              <ImageUpload
-                onUploadSuccess={handleUploadSuccess}
-                onUploadError={handleUploadError}
-              />
-            </motion.div>
-          )}
-
-          {appState === 'recommendations' && (
-            <motion.div
-              key="recommendations"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-            >
-              <ShoeRecommendations
-                recommendations={recommendations}
-                onGenerateVisualizations={handleGenerateVisualizations}
-                isGenerating={isGenerating}
-              />
-            </motion.div>
-          )}
-
-          {appState === 'visualizations' && (
-            <motion.div
-              key="visualizations"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-            >
-              <OutfitVisualization visualizations={visualizations} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-white/10 backdrop-blur-md border-t border-white/20 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center text-white/80">
-            <p className="mb-2">
-              Powered by <span className="font-semibold">Google Gemini 2.5 Pro & Flash</span>
-            </p>
-            <p className="text-sm">
-              Built with React, TypeScript, and Framer Motion
-            </p>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        {step === 'upload' && (
+          <div style={{
+            background: 'white',
+            padding: '40px',
+            borderRadius: '20px',
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)'
+          }}>
+            <ImageUpload 
+              onUploadSuccess={handleUploadSuccess}
+              onUploadError={handleUploadError}
+            />
+            {backendStatus === 'offline' && (
+              <p style={{
+                textAlign: 'center',
+                marginTop: '20px',
+                color: '#ef4444'
+              }}>
+                Please start the backend server on port 8080 to continue
+              </p>
+            )}
           </div>
-        </div>
-      </footer>
+        )}
+
+        {step === 'recommendations' && recommendations.length > 0 && (
+          <ShoeRecommendations
+            recommendations={recommendations}
+            onGenerateVisualizations={handleGenerateVisualizations}
+            isGenerating={isLoading}
+          />
+        )}
+
+        {step === 'visualizations' && visualizations.length > 0 && (
+          <OutfitVisualization visualizations={visualizations} />
+        )}
+
+        {/* Back/Reset Button */}
+        {(step === 'recommendations' || step === 'visualizations') && (
+          <div style={{ textAlign: 'center', marginTop: '30px' }}>
+            <button
+              onClick={resetApp}
+              style={{
+                background: 'rgba(255, 255, 255, 0.2)',
+                color: 'white',
+                border: '2px solid white',
+                padding: '12px 30px',
+                borderRadius: '25px',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'white';
+                e.currentTarget.style.color = '#764ba2';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                e.currentTarget.style.color = 'white';
+              }}
+            >
+              Start Over with New Photo
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* CSS for spinner animation */}
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };
