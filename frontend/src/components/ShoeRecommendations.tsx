@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, ChevronLeft, ChevronRight, Wand2 } from 'lucide-react';
-import { ShoeRecommendation } from '../types';
+import { ShoeRecommendation } from '../types/index';
 
 interface ShoeRecommendationsProps {
   recommendations: ShoeRecommendation[];
   isGeneratingVisualizations: boolean;
+  onSearchProducts?: () => void;
 }
 
 const ShoeRecommendations: React.FC<ShoeRecommendationsProps> = ({
   recommendations,
-  isGeneratingVisualizations
+  isGeneratingVisualizations,
+  onSearchProducts
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -204,6 +206,18 @@ const ShoeRecommendations: React.FC<ShoeRecommendationsProps> = ({
               </motion.div>
             ))}
           </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+          {onSearchProducts && (
+            <button
+              onClick={onSearchProducts}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
+            >
+              🔍 Search for Shoes Online
+            </button>
+          )}
         </div>
 
         {/* Background Generation Notice */}

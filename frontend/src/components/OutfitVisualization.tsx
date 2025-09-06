@@ -9,9 +9,10 @@ interface OutfitVisualizationProps {
   isGeneratingVideos?: boolean;
   hasVideos?: boolean;
   onBackToRecommendations?: () => void;
+  onSearchProducts?: () => void;
 }
 
-const OutfitVisualization: React.FC<OutfitVisualizationProps> = ({ visualizations, onLiveCheck, isGeneratingVideos, hasVideos, onBackToRecommendations }) => {
+const OutfitVisualization: React.FC<OutfitVisualizationProps> = ({ visualizations, onLiveCheck, isGeneratingVideos, hasVideos, onBackToRecommendations, onSearchProducts }) => {
   const [currentShoeIndex, setCurrentShoeIndex] = useState(0);
   const [currentAngleIndex, setCurrentAngleIndex] = useState(0);
 
@@ -81,6 +82,14 @@ const OutfitVisualization: React.FC<OutfitVisualizationProps> = ({ visualization
           </div>
           
           <div className="flex gap-3">
+            {onSearchProducts && (
+              <button
+                onClick={onSearchProducts}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2"
+              >
+                🔍 Buy Shoes
+              </button>
+            )}
             {onLiveCheck && (
               <button
                 onClick={onLiveCheck}

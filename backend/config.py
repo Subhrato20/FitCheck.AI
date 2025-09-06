@@ -27,6 +27,9 @@ class Config:
     # FAL API configuration
     FAL_KEY = os.getenv('FAL_KEY')
     
+    # Exa API configuration
+    EXA_API_KEY = os.getenv('EXA_API_KEY')
+    
     # Gemini model names
     GEMINI_PRO_VISION_MODEL = 'gemini-2.5-pro'
     GEMINI_FLASH_MODEL = 'gemini-2.5-flash'

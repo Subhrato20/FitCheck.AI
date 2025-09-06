@@ -6,9 +6,10 @@ import { ShoeVideoGeneration } from '../types';
 interface VideoVisualizationProps {
   videoGenerations: ShoeVideoGeneration[];
   onBackToVisualizations?: () => void;
+  onSearchProducts?: () => void;
 }
 
-const VideoVisualization: React.FC<VideoVisualizationProps> = ({ videoGenerations, onBackToVisualizations }) => {
+const VideoVisualization: React.FC<VideoVisualizationProps> = ({ videoGenerations, onBackToVisualizations, onSearchProducts }) => {
   const [currentShoeIndex, setCurrentShoeIndex] = useState(0);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -86,13 +87,23 @@ const VideoVisualization: React.FC<VideoVisualizationProps> = ({ videoGeneration
             </div>
           </div>
           
-          <button
-            onClick={downloadVideo}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Download
-          </button>
+          <div className="flex gap-3">
+            {onSearchProducts && (
+              <button
+                onClick={onSearchProducts}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2"
+              >
+                🔍 Buy Shoes
+              </button>
+            )}
+            <button
+              onClick={downloadVideo}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Download
+            </button>
+          </div>
         </div>
 
         {/* Shoe Navigation */}

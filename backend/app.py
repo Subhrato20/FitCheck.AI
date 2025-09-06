@@ -11,6 +11,7 @@ from config import Config
 from utils import allowed_file
 from services.gemini_service import GeminiService
 from services.video_service import VideoService
+from services.exa_service import ExaService
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -22,6 +23,7 @@ Config.init_app(app)
 # Initialize services
 gemini_service = GeminiService()
 video_service = VideoService()
+exa_service = ExaService()
 
 
 @app.route('/health', methods=['GET'])
@@ -244,10 +246,72 @@ def generate_videos():
         print(f"Error in video generation: {str(e)}")
         return jsonify({"error": f"Video generation failed: {str(e)}"}), 500
 
+@app.route('/search-products', methods=['POST'])
+def search_products():
+    """Search for products using Firecrawl based on shoe recommendations"""
+    
+    data = request.json
+    shoes = data.get('shoes', [])
+    outfit_description = data.get('outfit_description', '')
+    
+    if not shoes:
+        return jsonify({"error": "No shoes provided for search"}), 400
+    
+    try:
+        # Search for products using Exa
+        search_results = exa_service.search_shoes_for_outfit(outfit_description, shoes)
+        
+        # Group results by shoe recommendation
+        grouped_results = {}
+        for result in search_results:
+            shoe_info = result.get('shoe_info', {})
+            shoe_key = f"{shoe_info.get('brand', '')} {shoe_info.get('name', '')}"
+            
+            if shoe_key not in grouped_results:
+                grouped_results[shoe_key] = {
+                    'shoe': shoe_info,
+                    'search_results': []
+                }
+            
+            grouped_results[shoe_key]['search_results'].append({
+                'url': result.get('url', ''),
+                'title': result.get('title', ''),
+                'description': result.get('description', ''),
+                'source': result.get('source', ''),
+                'search_query': result.get('search_query', '')
+            })
+        
+        # Convert to list format
+        results = []
+        for shoe_key, data in grouped_results.items():
+            results.append({
+                'shoe': data['shoe'],
+                'search_results': data['search_results'][:2]  # Limit to 2 results per shoe
+            })
+        
+        return jsonify({
+            "success": True,
+            "results": results
+        })
+        
+    except Exception as e:
+        print(f"Error in product search: {str(e)}")
+        return jsonify({"error": f"Product search failed: {str(e)}"}), 500
+
 @app.route('/test-gemini', methods=['GET'])
 def test_gemini():
     """Test Gemini API connection"""
     result = gemini_service.test_connection()
+    
+    if result["success"]:
+        return jsonify(result)
+    else:
+        return jsonify(result), 500
+
+@app.route('/test-exa', methods=['GET'])
+def test_exa():
+    """Test Exa API connection"""
+    result = exa_service.test_connection()
     
     if result["success"]:
         return jsonify(result)

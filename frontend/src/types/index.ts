@@ -46,3 +46,16 @@ export interface GenerateVideosResponse {
   success: boolean;
   results: ShoeVideoGeneration[];
 }
+
+export interface ProductSearchResult {
+  url: string;
+  title: string;
+  description: string;
+  source: string;
+  search_query: string;
+}
+
+export interface ProductSearchResponse {
+  shoe: ShoeRecommendation;
+  search_results: ProductSearchResult[];
+}

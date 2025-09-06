@@ -31,6 +31,9 @@ grpcio-status==1.71.2
 # FAL client for video generation
 fal-client==0.4.0
 
+# Exa API for web search
+exa-py==1.0.0
+
 # Core dependencies
 anyio==4.10.0
 certifi==2025.8.3

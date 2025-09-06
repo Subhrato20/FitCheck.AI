@@ -3,14 +3,16 @@ import ImageUpload from './components/ImageUpload';
 import ShoeRecommendations from './components/ShoeRecommendations';
 import OutfitVisualization from './components/OutfitVisualization';
 import VideoVisualization from './components/VideoVisualization';
+import ProductSearch from './components/ProductSearch';
 import { generateOutfitsAI, generateVideos, healthCheck } from './services/api';
-import { ShoeRecommendation, ShoeVisualization, ShoeVideoGeneration, UploadResponse } from './types';
+import { ShoeRecommendation, ShoeVisualization, ShoeVideoGeneration, UploadResponse, ProductSearchResponse } from './types/index';
 
 const App: React.FC = () => {
-  const [step, setStep] = useState<'upload' | 'recommendations' | 'visualizations' | 'videos'>('upload');
+  const [step, setStep] = useState<'upload' | 'recommendations' | 'visualizations' | 'videos' | 'products'>('upload');
   const [recommendations, setRecommendations] = useState<ShoeRecommendation[]>([]);
   const [visualizations, setVisualizations] = useState<ShoeVisualization[]>([]);
   const [videoGenerations, setVideoGenerations] = useState<ShoeVideoGeneration[]>([]);
+  const [productSearchResults, setProductSearchResults] = useState<ProductSearchResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingVisualizations, setIsGeneratingVisualizations] = useState(false);
   const [isGeneratingVideos, setIsGeneratingVideos] = useState(false);
@@ -96,11 +98,20 @@ const App: React.FC = () => {
     setStep('visualizations');
   };
 
+  const handleSearchProducts = () => {
+    setStep('products');
+  };
+
+  const handleProductSearchComplete = (results: ProductSearchResponse[]) => {
+    setProductSearchResults(results);
+  };
+
   const resetApp = () => {
     setStep('upload');
     setRecommendations([]);
     setVisualizations([]);
     setVideoGenerations([]);
+    setProductSearchResults([]);
     setError(null);
     setIsGeneratingVisualizations(false);
     setIsGeneratingVideos(false);
@@ -139,13 +150,14 @@ const App: React.FC = () => {
 
       {/* Navigation Steps */}
       <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8 mb-8 md:mb-12">
-        {['upload', 'recommendations', 'visualizations', 'videos'].map((s, index) => (
+        {['upload', 'recommendations', 'visualizations', 'videos', 'products'].map((s, index) => (
           <div key={s} className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
               step === s || 
               (s === 'recommendations' && (recommendations.length > 0 || isLoading)) ||
               (s === 'visualizations' && visualizations.length > 0) ||
-              (s === 'videos' && (videoGenerations.length > 0 || isGeneratingVideos))
+              (s === 'videos' && (videoGenerations.length > 0 || isGeneratingVideos)) ||
+              (s === 'products' && productSearchResults.length > 0)
               ? 'bg-white text-stone-700 shadow-lg' : 'bg-white/20 text-stone-600/70'
             }`}>
               {index + 1}
@@ -156,7 +168,8 @@ const App: React.FC = () => {
               {s === 'upload' ? 'Upload Photo' : 
                s === 'recommendations' ? 'Processing...' : 
                s === 'visualizations' ? 'View AI Try-On' :
-               isGeneratingVideos ? 'Generating Videos...' : 'Live Check Videos'}
+               s === 'videos' ? (isGeneratingVideos ? 'Generating Videos...' : 'Live Check Videos') :
+               'Find Products'}
             </span>
           </div>
         ))}
@@ -204,6 +217,7 @@ const App: React.FC = () => {
           <ShoeRecommendations
             recommendations={recommendations}
             isGeneratingVisualizations={isGeneratingVisualizations}
+            onSearchProducts={handleSearchProducts}
           />
         )}
 
@@ -214,6 +228,7 @@ const App: React.FC = () => {
             isGeneratingVideos={isGeneratingVideos}
             hasVideos={videoGenerations.length > 0}
             onBackToRecommendations={handleBackToRecommendations}
+            onSearchProducts={handleSearchProducts}
           />
         )}
 
@@ -221,11 +236,20 @@ const App: React.FC = () => {
           <VideoVisualization 
             videoGenerations={videoGenerations} 
             onBackToVisualizations={handleBackToVisualizations}
+            onSearchProducts={handleSearchProducts}
+          />
+        )}
+
+        {step === 'products' && (
+          <ProductSearch
+            recommendations={recommendations}
+            onBack={handleBackToRecommendations}
+            onSearchComplete={handleProductSearchComplete}
           />
         )}
 
         {/* Back/Reset Button */}
-        {(step === 'recommendations' || step === 'visualizations' || step === 'videos') && (
+        {(step === 'recommendations' || step === 'visualizations' || step === 'videos' || step === 'products') && (
           <div className="text-center mt-8">
             <button
               onClick={resetApp}
@@ -236,6 +260,18 @@ const App: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Floating Product Search Button - Always Visible */}
+      {recommendations.length > 0 && step !== 'products' && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <button
+            onClick={handleSearchProducts}
+            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-full font-semibold text-lg transition-all duration-300 shadow-2xl hover:shadow-3xl flex items-center gap-2 animate-pulse hover:animate-none"
+          >
+            🔍 Buy Shoes
+          </button>
+        </div>
+      )}
 
       {/* CSS for spinner animation */}
       <style>{`
