@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { ShoeRecommendation, ProductSearchResult, ProductSearchResponse } from '../types/index';
+import Button from './Button';
+import { Search, RefreshCw, ArrowLeft } from 'lucide-react';
 
 interface ProductSearchProps {
   recommendations: ShoeRecommendation[];
@@ -50,12 +52,14 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
 
       {searchResults.length === 0 && !isSearching && (
         <div className="text-center">
-          <button
+          <Button
             onClick={handleSearch}
-            className="bg-stone-600 hover:bg-stone-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl"
+            variant="primary"
+            size="lg"
+            leftIcon={<Search />}
           >
-            🔍 Search for Shoes Online
-          </button>
+            Search for Shoes Online
+          </Button>
         </div>
       )}
 
@@ -133,20 +137,24 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
       )}
 
       <div className="flex justify-center gap-4 mt-8">
-        <button
+        <Button
           onClick={onBack}
-          className="bg-white/20 hover:bg-white text-stone-700 hover:text-stone-800 border-2 border-white/30 hover:border-white px-6 py-3 rounded-full font-semibold transition-all duration-300 backdrop-blur-sm hover:shadow-lg"
+          variant="outline"
+          size="md"
+          leftIcon={<ArrowLeft />}
         >
-          ← Back to Recommendations
-        </button>
+          Back to Recommendations
+        </Button>
         
         {searchResults.length > 0 && (
-          <button
+          <Button
             onClick={handleSearch}
-            className="bg-stone-600 hover:bg-stone-700 text-white px-6 py-3 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
+            variant="primary"
+            size="md"
+            leftIcon={<RefreshCw />}
           >
-            🔄 Search Again
-          </button>
+            Search Again
+          </Button>
         )}
       </div>
     </div>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ChevronLeft, ChevronRight, Wand2 } from 'lucide-react';
+import { Sparkles, ChevronLeft, ChevronRight, Wand2, Search } from 'lucide-react';
 import { ShoeRecommendation } from '../types/index';
+import Button from './Button';
 
 interface ShoeRecommendationsProps {
   recommendations: ShoeRecommendation[];
@@ -91,12 +92,15 @@ const ShoeRecommendations: React.FC<ShoeRecommendationsProps> = ({
 
         {/* Shoe Navigation */}
         <div className="flex items-center justify-between mb-6">
-          <button
+          <Button
             onClick={prevShoe}
-            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+            variant="secondary"
+            size="sm"
+            className="!p-2"
+            aria-label="Previous shoe"
           >
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
-          </button>
+            <ChevronLeft />
+          </Button>
           
           <div className="flex gap-2">
             {recommendations.map((_, index) => (
@@ -110,12 +114,15 @@ const ShoeRecommendations: React.FC<ShoeRecommendationsProps> = ({
             ))}
           </div>
           
-          <button
+          <Button
             onClick={nextShoe}
-            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+            variant="secondary"
+            size="sm"
+            className="!p-2"
+            aria-label="Next shoe"
           >
-            <ChevronRight className="w-5 h-5 text-gray-600" />
-          </button>
+            <ChevronRight />
+          </Button>
         </div>
 
         {/* Current Shoe Display */}
@@ -211,12 +218,14 @@ const ShoeRecommendations: React.FC<ShoeRecommendationsProps> = ({
         {/* Action Buttons */}
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
           {onSearchProducts && (
-            <button
+            <Button
               onClick={onSearchProducts}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
+              variant="primary"
+              size="lg"
+              leftIcon={<Search />}
             >
-              🔍 Search for Shoes Online
-            </button>
+              Search for Shoes Online
+            </Button>
           )}
         </div>
 

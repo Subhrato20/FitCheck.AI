@@ -1,8 +1,9 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, Loader2 } from 'lucide-react';
+import { UploadCloud, X, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { UploadResponse } from '../types';
+import Button from './Button';
 
 interface ImageUploadProps {
   onUploadSuccess: (data: UploadResponse) => void;
@@ -13,7 +14,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadSuccess, onUploadErro
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback(async (file: File) => {
@@ -22,21 +22,18 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadSuccess, onUploadErro
       return;
     }
 
-    if (file.size > 16 * 1024 * 1024) { // 16MB limit
+    if (file.size > 16 * 1024 * 1024) {
       onUploadError('File size must be less than 16MB');
       return;
     }
 
-    setUploadedFile(file);
     
-    // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
       setPreview(e.target?.result as string);
     };
     reader.readAsDataURL(file);
 
-    // Upload to backend
     setIsUploading(true);
     const formData = new FormData();
     formData.append('image', file);
@@ -90,24 +87,23 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadSuccess, onUploadErro
 
   const handleRemove = useCallback(() => {
     setPreview(null);
-    setUploadedFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   }, []);
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full">
       <AnimatePresence>
         {!preview ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className={`relative border-2 border-dashed rounded-3xl p-8 md:p-12 text-center transition-all duration-300 ${
+            className={`relative border-2 border-dashed rounded-xl p-10 text-center transition-all duration-300 cursor-pointer ${
               isDragOver 
-                ? 'border-stone-400 bg-stone-200/50' 
-                : 'border-white/80 bg-white/40 hover:border-stone-300 hover:bg-white/50'
+                ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-50' 
+                : 'border-gray-300 bg-white/50 hover:border-emerald-300 hover:bg-gradient-to-br hover:from-emerald-50/30 hover:to-teal-50/30'
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -125,21 +121,25 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadSuccess, onUploadErro
             <motion.div
               animate={{ 
                 scale: isDragOver ? 1.1 : 1,
-                rotate: isDragOver ? 5 : 0 
+                y: isDragOver ? -5 : 0,
+                rotate: isDragOver ? 5 : 0
               }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="mb-6"
             >
-              <Upload className="w-16 h-16 mx-auto mb-4 text-gray-700 drop-shadow-lg" />
+              <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+                <UploadCloud className="w-8 h-8 text-emerald-600" />
+              </div>
             </motion.div>
             
-            <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 drop-shadow-lg">
+            <h3 className="text-xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
               Upload Your Outfit Photo
             </h3>
-            <p className="text-gray-800 mb-4 text-lg font-medium drop-shadow-md">
+            <p className="text-gray-600 mb-4 text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>
               Drag and drop your image here, or click to browse
             </p>
-            <p className="text-sm text-gray-700 font-medium drop-shadow-sm">
-              Supports JPG, PNG, GIF, WebP (max 16MB)
+            <p className="text-xs text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
+              JPG, PNG, GIF, WebP • Max 16MB
             </p>
           </motion.div>
         ) : (
@@ -147,41 +147,41 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadSuccess, onUploadErro
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white/95 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20"
+            className="relative bg-white/80 backdrop-blur rounded-xl p-4 shadow-lg border border-white/50"
           >
-            <div className="relative">
-              <img
-                src={preview}
-                alt="Uploaded outfit"
-                className="max-w-full max-h-80 w-auto h-auto object-contain rounded-2xl bg-white shadow-sm"
-                style={{ maxWidth: '500px', maxHeight: '400px' }}
-              />
-              
-              {isUploading && (
-                <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
-                  <div className="bg-white rounded-full p-4">
-                    <Loader2 className="w-8 h-8 text-stone-600 loading-spinner" />
+            <div className="flex justify-center">
+              <div className="relative group">
+                <img
+                  src={preview}
+                  alt="Uploaded outfit"
+                  className="max-w-full max-h-80 w-auto h-auto object-contain rounded-lg bg-white shadow-sm"
+                  style={{ maxWidth: '500px', maxHeight: '400px' }}
+                />
+                
+                {isUploading && (
+                  <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                    <motion.div 
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="bg-white rounded-full p-4"
+                    >
+                      <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+                    </motion.div>
                   </div>
-                </div>
-              )}
-              
-              <button
-                onClick={handleRemove}
-                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors"
-                disabled={isUploading}
-              >
-                <X className="w-4 h-4" />
-              </button>
+                )}
+                
+                {!isUploading && (
+                  <Button
+                    onClick={handleRemove}
+                    variant="tertiary"
+                    size="sm"
+                    className="absolute top-3 right-3 backdrop-blur opacity-0 group-hover:opacity-100 !p-2"
+                    leftIcon={<X />}
+                  />
+                )}
+              </div>
             </div>
             
-            <div className="mt-4">
-              <h4 className="font-semibold text-gray-800 mb-1">
-                {uploadedFile?.name}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {(uploadedFile?.size && (uploadedFile.size / 1024 / 1024).toFixed(2))} MB
-              </p>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>
